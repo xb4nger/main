@@ -432,10 +432,10 @@ function Library:create(options)
 	end
 
 	options = self:set_defaults({
-		Name = "b4nger   |Private 1.0",
+		Name = "b4nger",
 		Size = UDim2.fromOffset(600, 400),
 		Theme = self.Themes[settings.Theme],
-		Link = "Main"
+		Link = "https://github.com/xb4nger/main/ui"
 	}, options)
 
 	if getgenv and getgenv().MercuryUI then
