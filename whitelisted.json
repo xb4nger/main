@@ -1,1 +1,5 @@
-print("s1 is a skid go away")
+{
+  "allowedUserIds":
+  [8019431290,
+  8362630316]
+}
