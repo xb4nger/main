@@ -7657,13 +7657,14 @@ do
                     PaddingRight = UDim.new(0, 2)
                 })
 
-                Items["Header"].Instance.Visible = Window.IsOpen
+                Items["Header"].Instance.Visible = false -- removed title bar + MAIN UI dock
 
                 -- Profile header (replaces old horizontal tabs area)
-                local ProfileBarHeight = 48
+                local ProfileBarHeight = 56
                 local SidebarWidth = 110
                 local TopOffset = 11
-                local BottomPad = 10
+                local BottomPad = 28 -- room for footer
+                local FooterHeight = 18
 
                 Items["ProfileBar"] = Library:Create("Frame", {
                     Name = "\0",
@@ -7691,8 +7692,8 @@ do
                     BorderOffset = UDim.new(0, 1)
                 }):AddToTheme({ Color = "Border" })
 
-                -- Avatar
-                local AvatarSize = 36
+                -- Avatar (larger, no rounded corners)
+                local AvatarSize = 44
                 Items["ProfileAvatar"] = Library:Create("ImageLabel", {
                     Name = "\0",
                     Parent = Items["ProfileBar"].Instance,
@@ -7712,12 +7713,6 @@ do
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     Color = Library.Theme["Border"]
                 }):AddToTheme({ Color = "Border" })
-
-                Library:Create("UICorner", {
-                    Name = "\0",
-                    Parent = Items["ProfileAvatar"].Instance,
-                    CornerRadius = UDim.new(0, 4)
-                })
 
                 -- Info labels (right of avatar, split top/bottom)
                 local InfoLeft = 6 + AvatarSize + 10
@@ -7740,7 +7735,7 @@ do
                     Text = "AlwaysWinning.Online",
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, InfoLeft, 0, 6),
+                    Position = UDim2.new(0, InfoLeft, 0, 10),
                     Size = UDim2.new(1, -(InfoLeft + 8), 0, 16),
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd
@@ -7755,7 +7750,7 @@ do
                     Text = "Game: " .. tostring(GameName),
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, InfoLeft, 1, -22),
+                    Position = UDim2.new(0, InfoLeft, 1, -26),
                     Size = UDim2.new(1, -(InfoLeft + 8), 0, 16),
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd
@@ -7813,6 +7808,35 @@ do
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     Color = Library.Theme["Outline"]
                 }):AddToTheme({ Color = 'Outline' })
+
+                -- Footer with live clock
+                Items["Footer"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["MainFrame"].Instance,
+                    Position = UDim2.new(0, 10, 1, -BottomPad + 4),
+                    Size = UDim2.new(1, -20, 0, FooterHeight),
+                    BorderSizePixel = 0,
+                    BackgroundTransparency = 1
+                })
+
+                Items["FooterTime"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize,
+                    Parent = Items["Footer"].Instance,
+                    TextColor3 = Library.Theme["Inactive Text"],
+                    Text = os.date("%I:%M:%S %p"),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Size = UDim2.new(1, 0, 1, 0),
+                    TextXAlignment = Enum.TextXAlignment.Right
+                }):AddToTheme({ TextColor3 = "Inactive Text" })
+
+                Library:Connect(RunService.RenderStepped, function()
+                    if Items["FooterTime"] and Items["FooterTime"].Instance and Items["FooterTime"].Instance.Parent then
+                        Items["FooterTime"].Instance.Text = os.date("%I:%M:%S %p")
+                    end
+                end)
 
                 Window.Items = Items
                 Library.MainWindowFrame = Items["MainFrame"].Instance
@@ -7950,7 +7974,7 @@ do
                 Debounce = true
 
                 Window.IsOpen = Bool
-                Items["Header"].Instance.Visible = Bool
+                Items["Header"].Instance.Visible = false -- keep title/dock bar hidden
                 Library:SetWindowVisibilityState(Bool)
                 Library:SetBackgroundEffectsVisible(Bool)
                 UpdateDockState()
