@@ -1,0 +1,800 @@
+--[[
+    AlwaysWinning Loader
+    Matches NH / AlwaysWinning library theme, fonts, strokes, buttons
+]]
+
+if not LPH_OBFUSCATED then
+    LPH_JIT = function(...) return ... end
+    LPH_JIT_MAX = LPH_JIT
+    LPH_NO_VIRTUALIZE = LPH_JIT
+    LPH_NO_UPVALUES = function(f)
+        return function(...)
+            return f(...)
+        end
+    end
+    LPH_ENCSTR = LPH_JIT
+    LPH_ENCNUM = LPH_JIT
+    LPH_CRASH = function() end
+    LRM_SecondsLeft = "-1"
+    LRM_ScriptVersion = "1.0.1"
+    LRM_UserNote = "You are so sigma"
+    LRM_LinkedDiscordID = "Nil"
+    LRM_TotalExecutions = 99
+    LRM_IsUserPremium = true
+    Type = "[Developer]"
+
+    local assert, type, setfenv = assert, type, setfenv
+
+    LPH_ENCNUM = function(toEncrypt, ...)
+        assert(type(toEncrypt) == "number" and #{...} == 0)
+        return toEncrypt
+    end
+    LPH_NUMENC = LPH_ENCNUM
+
+    LPH_ENCSTR = function(toEncrypt, ...)
+        assert(type(toEncrypt) == "string" and #{...} == 0)
+        return toEncrypt
+    end
+    LPH_STRENC = LPH_ENCSTR
+
+    LPH_ENCFUNC = function(toEncrypt, encKey, decKey, ...)
+        assert(type(toEncrypt) == "function" and type(encKey) == "string" and #{...} == 0)
+        return toEncrypt
+    end
+    LPH_FUNCENC = LPH_ENCFUNC
+
+    LPH_JIT = function(f, ...)
+        assert(type(f) == "function" and #{...} == 0)
+        return f
+    end
+    LPH_JIT_MAX = LPH_JIT
+
+    LPH_NO_VIRTUALIZE = function(f, ...)
+        assert(type(f) == "function" and #{...} == 0)
+        return f
+    end
+
+    LPH_NO_UPVALUES = function(f, ...)
+        assert(type(setfenv) == "function")
+        assert(type(f) == "function" and #{...} == 0)
+        return f
+    end
+
+    LPH_CRASH = function(...)
+        assert(#{...} == 0)
+    end
+end
+
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+-- ═══════════════════════════════════════════
+-- Theme (exact match to Library.lua)
+-- ═══════════════════════════════════════════
+local Theme = {
+    Background     = Color3.fromRGB(16, 17, 20),
+    Outline        = Color3.fromRGB(36, 38, 45),
+    Border         = Color3.fromRGB(7, 8, 10),
+    Accent         = Color3.fromRGB(152, 188, 255),
+    Risky          = Color3.fromRGB(255, 50, 50),
+    LightBorder    = Color3.fromRGB(12, 8, 12),
+    Border2        = Color3.fromRGB(5, 10, 14),
+    Text           = Color3.fromRGB(180, 180, 180),
+    Section        = Color3.fromRGB(20, 21, 25),
+    Element        = Color3.fromRGB(28, 29, 35),
+    HoveredElement = Color3.fromRGB(36, 38, 45),
+    InactiveText   = Color3.fromRGB(100, 100, 100),
+    Brand          = Color3.fromRGB(255, 215, 0),
+}
+
+local LibraryName = "AlwaysWinning"
+local FontSize = 9
+local AnimationTime = 0.25
+
+-- Services
+local cloneref = cloneref or function(o) return o end
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local CoreGui = cloneref(game:GetService("CoreGui"))
+local LocalPlayer = Players.LocalPlayer
+
+gethui = gethui or function() return CoreGui end
+
+-- ═══════════════════════════════════════════
+-- Pixel font (same as library)
+-- ═══════════════════════════════════════════
+local PixelFont
+do
+    local ok, font = pcall(function()
+        local dir = "AlwaysWinning"
+        if not isfolder(dir) then makefolder(dir) end
+        if not isfolder(dir .. "/Assets") then makefolder(dir .. "/Assets") end
+
+        local fontPath = dir .. "/Assets/SmallestPixel7.font"
+        local ttfId = "SmallestPixel7"
+
+        if not isfile(ttfId) then
+            writefile(ttfId, game:HttpGet("https://github.com/sametexe001/luas/raw/refs/heads/main/smallest_pixel-7.ttf"))
+        end
+
+        local data = {
+            name = "SmallestPixel7",
+            faces = {{
+                name = "SmallestPixel7",
+                weight = 400,
+                style = "Regular",
+                assetId = getcustomasset(ttfId)
+            }}
+        }
+        writefile(fontPath, HttpService:JSONEncode(data))
+        return Font.new(getcustomasset(fontPath))
+    end)
+
+    if ok and font then
+        PixelFont = font
+    else
+        PixelFont = Font.new("rbxasset://fonts/families/LegacyArial.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    end
+end
+
+-- ═══════════════════════════════════════════
+-- Helpers
+-- ═══════════════════════════════════════════
+local function Create(class, props)
+    local obj = Instance.new(class)
+    for k, v in pairs(props or {}) do
+        if k == "Parent" then
+            obj.Parent = v
+        else
+            obj[k] = v
+        end
+    end
+    return obj
+end
+
+local function AddDoubleStroke(parent)
+    Create("UIStroke", {
+        Parent = parent,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Outline,
+    })
+    Create("UIStroke", {
+        Parent = parent,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Border,
+        BorderOffset = UDim.new(0, 1),
+    })
+end
+
+local function AddAccentLine(parent)
+    return Create("Frame", {
+        Parent = parent,
+        Size = UDim2.new(1, 0, 0, 1),
+        BorderSizePixel = 0,
+        BackgroundColor3 = Theme.Accent,
+        ZIndex = 3,
+    })
+end
+
+local function AddElementGradient(parent)
+    return Create("UIGradient", {
+        Parent = parent,
+        Rotation = -90,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(172, 172, 172)),
+        }),
+    })
+end
+
+local function Tween(obj, props, time)
+    local t = TweenService:Create(obj, TweenInfo.new(time or AnimationTime, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), props)
+    t:Play()
+    return t
+end
+
+local function MakeDraggable(gui)
+    local dragging, dragStart, startPos
+    gui.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = gui.Position
+            local conn
+            conn = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    if conn then conn:Disconnect() end
+                end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+local function FadeOutAndDestroy(root, callback)
+    local info = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+    local last
+    for _, d in ipairs(root:GetDescendants()) do
+        if d:IsA("Frame") or d:IsA("TextButton") then
+            last = TweenService:Create(d, info, { BackgroundTransparency = 1 })
+            last:Play()
+        elseif d:IsA("TextLabel") then
+            last = TweenService:Create(d, info, { TextTransparency = 1, BackgroundTransparency = 1 })
+            last:Play()
+        elseif d:IsA("ImageLabel") then
+            last = TweenService:Create(d, info, { ImageTransparency = 1, BackgroundTransparency = 1 })
+            last:Play()
+        elseif d:IsA("UIStroke") then
+            last = TweenService:Create(d, info, { Transparency = 1 })
+            last:Play()
+        end
+    end
+    if root:IsA("Frame") or root:IsA("TextButton") then
+        last = TweenService:Create(root, info, { BackgroundTransparency = 1 })
+        last:Play()
+    end
+    task.delay(0.45, function()
+        if root and root.Parent then root:Destroy() end
+        if callback then callback() end
+    end)
+end
+
+-- ═══════════════════════════════════════════
+-- Holder
+-- ═══════════════════════════════════════════
+local Holder = Create("ScreenGui", {
+    Parent = gethui(),
+    Name = "\0",
+    ZIndexBehavior = Enum.ZIndexBehavior.Global,
+    IgnoreGuiInset = true,
+    ResetOnSpawn = false,
+})
+
+-- ═══════════════════════════════════════════
+-- Game row template factory
+-- ═══════════════════════════════════════════
+local function CreateGameRow()
+    local row = Create("TextButton", {
+        Name = "GameFrame",
+        AutoButtonColor = false,
+        Text = "",
+        Size = UDim2.new(1, 0, 0, 44),
+        BorderSizePixel = 0,
+        BackgroundColor3 = Theme.Element,
+    })
+    AddElementGradient(row)
+    Create("UIStroke", {
+        Parent = row,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Border,
+    })
+
+    local icon = Create("ImageLabel", {
+        Name = "ImageLabel",
+        Parent = row,
+        BackgroundColor3 = Theme.Section,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(6, 6),
+        Size = UDim2.fromOffset(32, 32),
+        Image = "",
+        ScaleType = Enum.ScaleType.Fit,
+        ImageTransparency = 0.2,
+    })
+    Create("UIStroke", {
+        Parent = icon,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Outline,
+    })
+
+    local name = Create("TextLabel", {
+        Name = "GameName",
+        Parent = row,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "Game",
+        TextColor3 = Theme.InactiveText,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(46, 6),
+        Size = UDim2.new(1, -120, 0, 14),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+    })
+
+    local status = Create("TextLabel", {
+        Name = "UpdateStatus",
+        Parent = row,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "Status",
+        TextColor3 = Theme.InactiveText,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(46, 24),
+        Size = UDim2.new(1, -120, 0, 14),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+    })
+
+    local badge = Create("Frame", {
+        Name = "SubTime",
+        Parent = row,
+        BackgroundColor3 = Theme.Section,
+        BorderSizePixel = 0,
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -8, 0.5, 0),
+        Size = UDim2.fromOffset(56, 20),
+    })
+    Create("UIStroke", {
+        Parent = badge,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Outline,
+    })
+    local badgeText = Create("TextLabel", {
+        Name = "Text",
+        Parent = badge,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "30d",
+        TextColor3 = Theme.InactiveText,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Size = UDim2.fromScale(1, 1),
+        TextXAlignment = Enum.TextXAlignment.Center,
+    })
+
+    row:SetAttribute("Selected", false)
+
+    return row, {
+        Icon = icon,
+        Name = name,
+        Status = status,
+        Badge = badge,
+        BadgeText = badgeText,
+    }
+end
+
+-- ═══════════════════════════════════════════
+-- Main Loader Window
+-- ═══════════════════════════════════════════
+local function BuildMainWindow()
+    local window = Create("Frame", {
+        Name = "Main",
+        Parent = Holder,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(360, 300),
+        BorderSizePixel = 0,
+        BackgroundColor3 = Theme.Background,
+        Visible = false,
+    })
+    AddDoubleStroke(window)
+    AddAccentLine(window)
+    MakeDraggable(window)
+
+    local header = Create("Frame", {
+        Name = "Header",
+        Parent = window,
+        BackgroundColor3 = Theme.Section,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(0, 1),
+        Size = UDim2.new(1, 0, 0, 28),
+    })
+
+    local title = Create("TextLabel", {
+        Name = "Title",
+        Parent = header,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = LibraryName,
+        TextColor3 = Theme.Brand,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(10, 0),
+        Size = UDim2.new(1, -40, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+
+    local closeBtn = Create("TextButton", {
+        Name = "Close",
+        Parent = header,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "X",
+        TextColor3 = Theme.InactiveText,
+        AutoButtonColor = false,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -8, 0.5, 0),
+        Size = UDim2.fromOffset(20, 16),
+    })
+
+    local listOutline = Create("Frame", {
+        Name = "ListOutline",
+        Parent = window,
+        BackgroundColor3 = Theme.Border2,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(10, 38),
+        Size = UDim2.new(1, -20, 1, -80),
+    })
+
+    local list = Create("ScrollingFrame", {
+        Name = "GamesHolder",
+        Parent = listOutline,
+        BackgroundColor3 = Theme.Background,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(1, 1),
+        Size = UDim2.new(1, -2, 1, -2),
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = Theme.Accent,
+        ScrollingDirection = Enum.ScrollingDirection.Y,
+    })
+    Create("UIStroke", {
+        Parent = list,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Outline,
+    })
+    Create("UIListLayout", {
+        Parent = list,
+        Padding = UDim.new(0, 3),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+    })
+    Create("UIPadding", {
+        Parent = list,
+        PaddingTop = UDim.new(0, 4),
+        PaddingBottom = UDim.new(0, 4),
+        PaddingLeft = UDim.new(0, 4),
+        PaddingRight = UDim.new(0, 4),
+    })
+
+    -- Load button (same style as library Button)
+    local loadBtn = Create("TextButton", {
+        Name = "Load",
+        Parent = window,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "",
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 10, 1, -32),
+        Size = UDim2.new(1, -20, 0, 22),
+        BackgroundColor3 = Theme.Element,
+    })
+    AddDoubleStroke(loadBtn)
+    AddElementGradient(loadBtn)
+
+    local loadLabel = Create("TextLabel", {
+        Name = "Label",
+        Parent = loadBtn,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "Load",
+        TextColor3 = Theme.Text,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Size = UDim2.fromScale(1, 1),
+        TextXAlignment = Enum.TextXAlignment.Center,
+    })
+
+    loadBtn.MouseEnter:Connect(function()
+        Tween(loadBtn, { BackgroundColor3 = Theme.HoveredElement })
+    end)
+    loadBtn.MouseLeave:Connect(function()
+        Tween(loadBtn, { BackgroundColor3 = Theme.Element })
+    end)
+
+    closeBtn.MouseEnter:Connect(function()
+        Tween(closeBtn, { TextColor3 = Theme.Text })
+    end)
+    closeBtn.MouseLeave:Connect(function()
+        Tween(closeBtn, { TextColor3 = Theme.InactiveText })
+    end)
+
+    return {
+        Window = window,
+        List = list,
+        LoadBtn = loadBtn,
+        LoadLabel = loadLabel,
+        CloseBtn = closeBtn,
+        Title = title,
+    }
+end
+
+-- ═══════════════════════════════════════════
+-- Loading splash
+-- ═══════════════════════════════════════════
+local function BuildLoadingWindow()
+    local window = Create("Frame", {
+        Name = "LoadingWindow",
+        Parent = Holder,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(180, 120),
+        BorderSizePixel = 0,
+        BackgroundColor3 = Theme.Background,
+        Visible = false,
+    })
+    AddDoubleStroke(window)
+    AddAccentLine(window)
+    MakeDraggable(window)
+
+    local header = Create("Frame", {
+        Parent = window,
+        BackgroundColor3 = Theme.Section,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(0, 1),
+        Size = UDim2.new(1, 0, 0, 24),
+    })
+
+    Create("TextLabel", {
+        Parent = header,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = LibraryName,
+        TextColor3 = Theme.Brand,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.fromOffset(8, 0),
+        Size = UDim2.new(1, -16, 1, 0),
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+
+    local status = Create("TextLabel", {
+        Name = "Status",
+        Parent = window,
+        FontFace = PixelFont,
+        TextSize = FontSize,
+        Text = "Loading...",
+        TextColor3 = Theme.Text,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 40),
+        Size = UDim2.new(1, 0, 0, 16),
+        TextXAlignment = Enum.TextXAlignment.Center,
+    })
+
+    local track = Create("Frame", {
+        Name = "Track",
+        Parent = window,
+        BackgroundColor3 = Theme.Element,
+        BorderSizePixel = 0,
+        AnchorPoint = Vector2.new(0.5, 0),
+        Position = UDim2.new(0.5, 0, 1, -28),
+        Size = UDim2.fromOffset(140, 6),
+    })
+    Create("UIStroke", {
+        Parent = track,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        LineJoinMode = Enum.LineJoinMode.Miter,
+        Color = Theme.Border,
+    })
+
+    local fill = Create("Frame", {
+        Name = "Fill",
+        Parent = track,
+        BackgroundColor3 = Theme.Accent,
+        BorderSizePixel = 0,
+        Size = UDim2.new(0, 0, 1, 0),
+    })
+    AddElementGradient(fill)
+
+    return {
+        Window = window,
+        Status = status,
+        Fill = fill,
+    }
+end
+
+-- ═══════════════════════════════════════════
+-- Public API
+-- ═══════════════════════════════════════════
+local Melatonin = {}
+local MainUI = BuildMainWindow()
+local LoadUI = BuildLoadingWindow()
+
+local ActiveRow = nil
+local FrameUrls = {}
+local FrameCallbacks = {}
+
+local function SetRowSelected(row, refs, selected)
+    if selected then
+        Tween(row, { BackgroundColor3 = Theme.HoveredElement })
+        Tween(refs.Name, { TextColor3 = Theme.Accent })
+        Tween(refs.Status, { TextColor3 = Theme.Text })
+        Tween(refs.BadgeText, { TextColor3 = Theme.Text })
+        Tween(refs.Icon, { ImageTransparency = 0 })
+        row:SetAttribute("Selected", true)
+    else
+        Tween(row, { BackgroundColor3 = Theme.Element })
+        Tween(refs.Name, { TextColor3 = Theme.InactiveText })
+        Tween(refs.Status, { TextColor3 = Theme.InactiveText })
+        Tween(refs.BadgeText, { TextColor3 = Theme.InactiveText })
+        Tween(refs.Icon, { ImageTransparency = 0.2 })
+        row:SetAttribute("Selected", false)
+    end
+end
+
+local function WireMainButtons()
+    MainUI.LoadBtn.MouseButton1Click:Connect(function()
+        if not ActiveRow then return end
+
+        Tween(MainUI.LoadBtn, { BackgroundColor3 = Theme.Accent }, 0.08)
+        task.delay(0.1, function()
+            if MainUI.LoadBtn and MainUI.LoadBtn.Parent then
+                Tween(MainUI.LoadBtn, { BackgroundColor3 = Theme.Element }, 0.15)
+            end
+        end)
+
+        local cb = FrameCallbacks[ActiveRow]
+        if typeof(cb) == "function" then
+            cb(ActiveRow, MainUI.Window)
+            return
+        end
+
+        local url = FrameUrls[ActiveRow]
+        if url and url ~= "" then
+            local win = MainUI.Window
+            FadeOutAndDestroy(win)
+            task.spawn(function()
+                local ok, err = pcall(function()
+                    loadstring(game:HttpGet(url))()
+                end)
+                if not ok then
+                    warn("[AlwaysWinning Loader] Failed to load:", err)
+                end
+            end)
+        end
+    end)
+
+    MainUI.CloseBtn.MouseButton1Click:Connect(function()
+        FadeOutAndDestroy(MainUI.Window)
+    end)
+end
+
+WireMainButtons()
+
+function Melatonin.LoadingEffect(duration, player, frameConfigs, _mainTemplate, _gameFrameTemplate)
+    duration = duration or 2
+    frameConfigs = frameConfigs or {}
+
+    -- rebuild if needed
+    if not MainUI.Window or not MainUI.Window.Parent then
+        MainUI = BuildMainWindow()
+        WireMainButtons()
+    end
+    if not LoadUI.Window or not LoadUI.Window.Parent then
+        LoadUI = BuildLoadingWindow()
+    end
+
+    LoadUI.Window.Visible = true
+    LoadUI.Fill.Size = UDim2.new(0, 0, 1, 0)
+    LoadUI.Status.Text = "Loading..."
+
+    local tween = TweenService:Create(
+        LoadUI.Fill,
+        TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        { Size = UDim2.new(1, 0, 1, 0) }
+    )
+    tween:Play()
+
+    task.spawn(function()
+        local steps = { "Initializing...", "Fetching games...", "Almost ready..." }
+        for _, s in ipairs(steps) do
+            task.wait(duration / (#steps + 1))
+            if LoadUI.Status and LoadUI.Status.Parent then
+                LoadUI.Status.Text = s
+            end
+        end
+    end)
+
+    tween.Completed:Once(function()
+        local oldLoad = LoadUI.Window
+        FadeOutAndDestroy(oldLoad)
+        LoadUI = BuildLoadingWindow()
+
+        MainUI.Window.Visible = true
+
+        for _, child in ipairs(MainUI.List:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+        FrameUrls = {}
+        FrameCallbacks = {}
+        ActiveRow = nil
+
+        for i, config in ipairs(frameConfigs) do
+            local row, refs = CreateGameRow()
+            row.LayoutOrder = i
+            row.Parent = MainUI.List
+
+            refs.Name.Text = config.GameName or ("Game " .. i)
+            refs.Status.Text = config.Status or "Unknown"
+            refs.BadgeText.Text = config.SubTime or "—"
+            if config.Image and config.Image ~= "" then
+                refs.Icon.Image = config.Image
+            end
+
+            if config.Url then
+                FrameUrls[row] = config.Url
+            end
+            if typeof(config.Callback) == "function" then
+                FrameCallbacks[row] = config.Callback
+            end
+
+            row.MouseButton1Click:Connect(function()
+                if ActiveRow and ActiveRow ~= row then
+                    local prev = ActiveRow
+                    local prevRefs = {
+                        Name = prev:FindFirstChild("GameName"),
+                        Status = prev:FindFirstChild("UpdateStatus"),
+                        BadgeText = prev:FindFirstChild("SubTime") and prev.SubTime:FindFirstChild("Text"),
+                        Icon = prev:FindFirstChild("ImageLabel"),
+                    }
+                    if prevRefs.Name then
+                        SetRowSelected(prev, prevRefs, false)
+                    end
+                end
+                SetRowSelected(row, refs, true)
+                ActiveRow = row
+            end)
+
+            row.MouseEnter:Connect(function()
+                if not row:GetAttribute("Selected") then
+                    Tween(row, { BackgroundColor3 = Theme.HoveredElement })
+                end
+            end)
+            row.MouseLeave:Connect(function()
+                if not row:GetAttribute("Selected") then
+                    Tween(row, { BackgroundColor3 = Theme.Element })
+                end
+            end)
+        end
+    end)
+end
+
+--[[
+Example usage (same API as before):
+
+local Melatonin = loadstring(...)()  -- or require this file
+
+Melatonin.LoadingEffect(2.5, game.Players.LocalPlayer, {
+    {
+        GameName = "South Bronx",
+        Image = "rbxassetid://17209801156",
+        SubTime = "30d",
+        Status = "Undetected",
+        Callback = function(frame, ui)
+            -- custom load logic
+        end,
+    },
+    {
+        GameName = "Tha Bronx 3",
+        Image = "rbxassetid://121479768348275",
+        SubTime = "30d",
+        Status = "Updated 11/23/2025",
+        Url = "https://example.com/script.lua",
+    },
+})
+]]
+
+return Melatonin, Holder, nil
