@@ -2729,7 +2729,7 @@ do
 
         Library.Watermark = function(Self, Params)
             local Watermark = {}
-            local PrefixText = tostring((Params and Params.Name) or "niggahack")
+            local PrefixText = tostring((Params and Params.Name) or "AlwaysWinning.Online")
             local WatermarkTick = tick()
             local WatermarkFps = 0
             local WatermarkDisplayedFps = 0
@@ -2742,16 +2742,17 @@ do
 
             local Items = {}
             do
+                -- Clean draggable status bar
                 Items["Watermark"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Library.Holder.Instance,
                     AnchorPoint = Vector2.new(0.5, 0),
-                    Position = UDim2.new(0.5, 0, 0, 42),
-                    Size = UDim2.new(0, 0, 0, 25),
+                    Position = UDim2.new(0.5, 0, 0, 12),
+                    Size = UDim2.new(0, 0, 0, 28),
                     BorderSizePixel = 0,
                     AutomaticSize = Enum.AutomaticSize.X,
-                    BackgroundColor3 = Library.Theme["Background"]
-                }):AddToTheme({ BackgroundColor3 = 'Background' })
+                    BackgroundColor3 = Library.Theme["Section"]
+                }):AddToTheme({ BackgroundColor3 = "Section" })
 
                 Items["Watermark"]:MakeDraggable()
 
@@ -2761,7 +2762,7 @@ do
                     ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     Color = Library.Theme["Outline"]
-                }):AddToTheme({ Color = 'Outline' })
+                }):AddToTheme({ Color = "Outline" })
 
                 Library:Create("UIStroke", {
                     Name = "\0",
@@ -2770,25 +2771,18 @@ do
                     LineJoinMode = Enum.LineJoinMode.Miter,
                     Color = Library.Theme["Border"],
                     BorderOffset = UDim.new(0, 1)
-                }):AddToTheme({ Color = 'Border' })
+                }):AddToTheme({ Color = "Border" })
 
-                Items["DarkLiner"] = Library:Create("Frame", {
-                    Name = "\0",
-                    Parent = Items["Watermark"].Instance,
-                    Position = UDim2.new(0, -8, 0, 1),
-                    Size = UDim2.new(1, 16, 0, 1),
-                    BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Light Border"]
-                }):AddToTheme({ BackgroundColor3 = 'Light Border' })
-
+                -- Top accent strip (full width of the bar)
                 Items["AccentLiner"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Items["Watermark"].Instance,
-                    Position = UDim2.new(0, -8, 0, 0),
-                    Size = UDim2.new(1, 16, 0, 1),
+                    Position = UDim2.new(0, 0, 0, 0),
+                    Size = UDim2.new(1, 0, 0, 2),
                     BorderSizePixel = 0,
-                    BackgroundColor3 = Library.Theme["Accent"]
-                }):AddToTheme({ BackgroundColor3 = 'Accent' })
+                    BackgroundColor3 = Library.Theme["Accent"],
+                    ZIndex = 2
+                }):AddToTheme({ BackgroundColor3 = "Accent" })
 
                 Items["AccentGradient"] = Library:Create("UIGradient", {
                     Name = "\0",
@@ -2810,18 +2804,18 @@ do
                     TextColor3 = Library.Theme["Text"],
                     Text = PrefixText,
                     AnchorPoint = Vector2.new(0, 0.5),
-                    Size = UDim2.new(0, 0, 0, 15),
+                    Size = UDim2.new(0, 0, 0, 16),
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0.5, 0),
+                    Position = UDim2.new(0, 0, 0.5, 1),
                     BorderSizePixel = 0,
                     AutomaticSize = Enum.AutomaticSize.X
-                }):AddToTheme({ TextColor3 = 'Text' })
+                }):AddToTheme({ TextColor3 = "Text" })
 
                 Library:Create("UIPadding", {
                     Name = "\0",
                     Parent = Items["Watermark"].Instance,
-                    PaddingRight = UDim.new(0, 8),
-                    PaddingLeft = UDim.new(0, 8)
+                    PaddingRight = UDim.new(0, 12),
+                    PaddingLeft = UDim.new(0, 12)
                 })
             end
 
