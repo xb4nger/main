@@ -7731,6 +7731,21 @@ do
                     end
                 end
 
+                Items["ProfileBrand"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize,
+                    Parent = Items["ProfileBar"].Instance,
+                    TextColor3 = Color3.fromRGB(255, 215, 0), -- yellow
+                    Text = "AlwaysWinning.Online",
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, InfoLeft, 0, 6),
+                    Size = UDim2.new(1, -(InfoLeft + 8), 0, 16),
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd
+                })
+
                 Items["ProfileGame"] = Library:Create("TextLabel", {
                     Name = "\0",
                     FontFace = Library.Font,
@@ -7738,21 +7753,6 @@ do
                     Parent = Items["ProfileBar"].Instance,
                     TextColor3 = Library.Theme["Text"],
                     Text = "Game: " .. tostring(GameName),
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0, InfoLeft, 0, 6),
-                    Size = UDim2.new(1, -(InfoLeft + 8), 0, 16),
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    TextTruncate = Enum.TextTruncate.AtEnd
-                }):AddToTheme({ TextColor3 = "Text" })
-
-                Items["ProfileUser"] = Library:Create("TextLabel", {
-                    Name = "\0",
-                    FontFace = Library.Font,
-                    TextSize = Library.FontSize,
-                    Parent = Items["ProfileBar"].Instance,
-                    TextColor3 = Library.Theme["Text"],
-                    Text = string.format("User: %s <%s>", LocalPlayer.DisplayName, LocalPlayer.Name),
                     BackgroundTransparency = 1,
                     BorderSizePixel = 0,
                     Position = UDim2.new(0, InfoLeft, 1, -22),
@@ -8076,7 +8076,7 @@ do
                     TextSize = Library.FontSize,
                     Parent = Items["InactiveInline"].Instance,
                     TextWrapped = true,
-                    TextColor3 = Library.Theme["Text"],
+                    TextColor3 = Library.Theme["Inactive Text"],
                     Text = Page.Name,
                     Size = UDim2.new(1, -8, 0, 15),
                     AnchorPoint = Vector2.new(0, 0.5),
@@ -8084,7 +8084,7 @@ do
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 6, 0.5, 0),
                     TextXAlignment = Enum.TextXAlignment.Left
-                }):AddToTheme({ TextColor3 = 'Text' })
+                }):AddToTheme({ TextColor3 = 'Inactive Text' })
 
                 Library:Create("UIStroke", {
                     Name = "\0",
@@ -8150,11 +8150,13 @@ do
                 Page.Active = Bool
 
                 if Bool then
-                    Items["Text"]:ChangeItemTheme({ TextColor3 = "Accent" })
-                    Items["Text"]:Tween({ TextColor3 = Library.Theme.Accent })
+                    -- selected tab uses a dimmer muted accent so it doesn't overpower
+                    local DimAccent = Library.Theme.Accent:Lerp(Color3.fromRGB(40, 40, 45), 0.55)
+                    Items["Text"]:ChangeItemTheme({ TextColor3 = function() return Library.Theme.Accent:Lerp(Color3.fromRGB(40, 40, 45), 0.55) end })
+                    Items["Text"]:Tween({ TextColor3 = DimAccent })
                 else
-                    Items["Text"]:ChangeItemTheme({ TextColor3 = "Text" })
-                    Items["Text"]:Tween({ TextColor3 = Library.Theme.Text })
+                    Items["Text"]:ChangeItemTheme({ TextColor3 = "Inactive Text" })
+                    Items["Text"]:Tween({ TextColor3 = Library.Theme["Inactive Text"] })
                 end
 
                 Items["Page"]:FadeDescendants(Bool, function()
@@ -8304,11 +8306,12 @@ do
                 Debounce = true
 
                 if Bool then
-                    Items["Inactive"]:ChangeItemTheme({ TextColor3 = "Accent" })
-                    Items["Inactive"]:Tween({ TextColor3 = Library.Theme.Accent })
+                    local DimAccent = Library.Theme.Accent:Lerp(Color3.fromRGB(40, 40, 45), 0.55)
+                    Items["Inactive"]:ChangeItemTheme({ TextColor3 = function() return Library.Theme.Accent:Lerp(Color3.fromRGB(40, 40, 45), 0.55) end })
+                    Items["Inactive"]:Tween({ TextColor3 = DimAccent })
                 else
-                    Items["Inactive"]:ChangeItemTheme({ TextColor3 = "Text" })
-                    Items["Inactive"]:Tween({ TextColor3 = Library.Theme.Text })
+                    Items["Inactive"]:ChangeItemTheme({ TextColor3 = "Inactive Text" })
+                    Items["Inactive"]:Tween({ TextColor3 = Library.Theme["Inactive Text"] })
                 end
 
                 Items["Page"]:FadeDescendants(Bool, function()
