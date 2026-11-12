@@ -7659,20 +7659,122 @@ do
 
                 Items["Header"].Instance.Visible = Window.IsOpen
 
+                -- Profile header (replaces old horizontal tabs area)
+                local ProfileBarHeight = 48
+                local SidebarWidth = 110
+                local TopOffset = 11
+                local BottomPad = 10
+
+                Items["ProfileBar"] = Library:Create("Frame", {
+                    Name = "\0",
+                    Parent = Items["MainFrame"].Instance,
+                    Position = UDim2.new(0, 10, 0, TopOffset),
+                    Size = UDim2.new(1, -20, 0, ProfileBarHeight),
+                    BorderSizePixel = 0,
+                    BackgroundColor3 = Library.Theme["Section"]
+                }):AddToTheme({ BackgroundColor3 = "Section" })
+
+                Library:Create("UIStroke", {
+                    Name = "\0",
+                    Parent = Items["ProfileBar"].Instance,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    Color = Library.Theme["Outline"]
+                }):AddToTheme({ Color = "Outline" })
+
+                Library:Create("UIStroke", {
+                    Name = "\0",
+                    Parent = Items["ProfileBar"].Instance,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    Color = Library.Theme["Border"],
+                    BorderOffset = UDim.new(0, 1)
+                }):AddToTheme({ Color = "Border" })
+
+                -- Avatar
+                local AvatarSize = 36
+                Items["ProfileAvatar"] = Library:Create("ImageLabel", {
+                    Name = "\0",
+                    Parent = Items["ProfileBar"].Instance,
+                    BackgroundColor3 = Library.Theme["Element"],
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, 6, 0.5, 0),
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    Size = UDim2.new(0, AvatarSize, 0, AvatarSize),
+                    Image = string.format("rbxthumb://type=AvatarHeadShot&id=%d&w=48&h=48", LocalPlayer.UserId),
+                    ScaleType = Enum.ScaleType.Crop
+                }):AddToTheme({ BackgroundColor3 = "Element" })
+
+                Library:Create("UIStroke", {
+                    Name = "\0",
+                    Parent = Items["ProfileAvatar"].Instance,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    LineJoinMode = Enum.LineJoinMode.Miter,
+                    Color = Library.Theme["Border"]
+                }):AddToTheme({ Color = "Border" })
+
+                Library:Create("UICorner", {
+                    Name = "\0",
+                    Parent = Items["ProfileAvatar"].Instance,
+                    CornerRadius = UDim.new(0, 4)
+                })
+
+                -- Info labels (right of avatar, split top/bottom)
+                local InfoLeft = 6 + AvatarSize + 10
+                local GameName = game.Name
+                do
+                    local ok, info = pcall(function()
+                        return game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+                    end)
+                    if ok and info and info.Name then
+                        GameName = info.Name
+                    end
+                end
+
+                Items["ProfileGame"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize,
+                    Parent = Items["ProfileBar"].Instance,
+                    TextColor3 = Library.Theme["Text"],
+                    Text = "Game: " .. tostring(GameName),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, InfoLeft, 0, 6),
+                    Size = UDim2.new(1, -(InfoLeft + 8), 0, 16),
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd
+                }):AddToTheme({ TextColor3 = "Text" })
+
+                Items["ProfileUser"] = Library:Create("TextLabel", {
+                    Name = "\0",
+                    FontFace = Library.Font,
+                    TextSize = Library.FontSize,
+                    Parent = Items["ProfileBar"].Instance,
+                    TextColor3 = Library.Theme["Text"],
+                    Text = string.format("User: %s <%s>", LocalPlayer.DisplayName, LocalPlayer.Name),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, InfoLeft, 1, -22),
+                    Size = UDim2.new(1, -(InfoLeft + 8), 0, 16),
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd
+                }):AddToTheme({ TextColor3 = "Text" })
+
+                -- Vertical tabs (left sidebar) below profile bar
                 Items["PagesOutline"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Items["MainFrame"].Instance,
-                    Position = UDim2.new(0, 10, 0, 11),
-                    Size = UDim2.new(1, -20, 0, 30),
+                    Position = UDim2.new(0, 10, 0, TopOffset + ProfileBarHeight + 6),
+                    Size = UDim2.new(0, SidebarWidth, 1, -(TopOffset + ProfileBarHeight + 6 + BottomPad)),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Border 2"]
-                }):AddToTheme({ BackgroundColor3 = 'Border 2' })
+                }):AddToTheme({ BackgroundColor3 = "Border 2" })
 
                 Library:Create("UIListLayout", {
                     Name = "\0",
                     Parent = Items["PagesOutline"].Instance,
-                    FillDirection = Enum.FillDirection.Horizontal,
-                    HorizontalFlex = Enum.UIFlexAlignment.Fill,
+                    FillDirection = Enum.FillDirection.Vertical,
                     Padding = UDim.new(0, 1),
                     SortOrder = Enum.SortOrder.LayoutOrder
                 })
@@ -7689,11 +7791,11 @@ do
                 Items["ContentOutline"] = Library:Create("Frame", {
                     Name = "\0",
                     Parent = Items["MainFrame"].Instance,
-                    Position = UDim2.new(0, 10, 0, 42),
-                    Size = UDim2.new(1, -20, 1, -52),
+                    Position = UDim2.new(0, 10 + SidebarWidth + 8, 0, TopOffset + ProfileBarHeight + 6),
+                    Size = UDim2.new(1, -(10 + SidebarWidth + 8 + 10), 1, -(TopOffset + ProfileBarHeight + 6 + BottomPad)),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Border 2"]
-                }):AddToTheme({ BackgroundColor3 = 'Border 2' })
+                }):AddToTheme({ BackgroundColor3 = "Border 2" })
 
                 Items["Content"] = Library:Create("Frame", {
                     Name = "\0",
@@ -7939,7 +8041,7 @@ do
                     TextColor3 = Color3.fromRGB(0, 0, 0),
                     Text = "",
                     AutoButtonColor = false,
-                    Size = UDim2.new(1, 0, 1, 0),
+                    Size = UDim2.new(1, 0, 0, 28),
                     BorderSizePixel = 0,
                     BackgroundColor3 = Library.Theme["Outline"]
                 }):AddToTheme({ BackgroundColor3 = 'Outline' })
@@ -7976,12 +8078,12 @@ do
                     TextWrapped = true,
                     TextColor3 = Library.Theme["Text"],
                     Text = Page.Name,
-                    Size = UDim2.new(0, 0, 0, 15),
-                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Size = UDim2.new(1, -8, 0, 15),
+                    AnchorPoint = Vector2.new(0, 0.5),
                     BorderSizePixel = 0,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.5, 0, 0.5, 0),
-                    AutomaticSize = Enum.AutomaticSize.X
+                    Position = UDim2.new(0, 6, 0.5, 0),
+                    TextXAlignment = Enum.TextXAlignment.Left
                 }):AddToTheme({ TextColor3 = 'Text' })
 
                 Library:Create("UIStroke", {
